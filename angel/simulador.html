@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador LED con Potenciómetro</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --panel-color: #16213e;
+            --led-off: #333;
+            --led-on: #ff004c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--panel-color);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 300px;
+        }
+
+        /* El LED */
+        #led {
+            width: 80px;
+            height: 80px;
+            background-color: var(--led-off);
+            border-radius: 50%;
+            margin: 20px auto;
+            transition: background-color 0.1s, box-shadow 0.1s;
+            border: 4px solid #0f3460;
+        }
+
+        /* El Potenciómetro (Slider) */
+        .slider-container {
+            margin-top: 30px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            margin-top: 15px;
+            color: #4ecca3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Simulador LED</h2>
+        
+        <div id="led"></div>
+        
+        <div class="slider-container">
+            <label for="pot">Potenciómetro (0 - 1023)</label><br><br>
+            <input type="range" id="pot" min="0" max="1023" value="0">
+        </div>
+
+        <div class="status-text">
+            Valor: <span id="valPot">0</span> | PWM: <span id="valPWM">0</span>
+        </div>
+    </div>
+
+    <script>
+        const pot = document.getElementById('pot');
+        const led = document.getElementById('led');
+        const valPot = document.getElementById('valPot');
+        const valPWM = document.getElementById('valPWM');
+        
+        const umbralBajo = 15;
+
+        pot.addEventListener('input', () => {
+            const valor = parseInt(pot.value);
+            valPot.innerText = valor;
+
+            if (valor < umbralBajo) {
+                // APAGADO TOTAL (como tu digitalWrite LOW)
+                led.style.backgroundColor = '#333';
+                led.style.boxShadow = 'none';
+                valPWM.innerText = "0 (APAGADO)";
+            } else {
+                // MAPEO (0-1023 -> 0-1 de opacidad / brillo)
+                // Usamos 1023 como en tu código original
+                let brilloNormalizado = (valor - umbralBajo) / (1023 - umbralBajo);
+                
+                // Aplicamos el color y un brillo (glow) proporcional
+                led.style.backgroundColor = `rgba(255, 0, 76, ${brilloNormalizado})`;
+                led.style.boxShadow = `0 0 ${brilloNormalizado * 40}px rgba(255, 0, 76, ${brilloNormalizado})`;
+                
+                valPWM.innerText = Math.round(brilloNormalizado * 1023);
+            }
+        });
+    </script>
+</body>
+</html>
